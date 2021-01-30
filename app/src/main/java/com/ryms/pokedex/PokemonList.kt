@@ -5,53 +5,54 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.ryms.pokedex.Adapter.PokemonListAdapter
+import com.ryms.pokedex.Common.Common
+import com.ryms.pokedex.Common.ItemOffsetDecoration
+import com.ryms.pokedex.Retrofit.IPokemonList
+import com.ryms.pokedex.Retrofit.RetrofitClient
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
+import retrofit2.Retrofit
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [PokemonList.newInstance] factory method to
- * create an instance of this fragment.
- */
 class PokemonList : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
+    internal var compositeDisposable = CompositeDisposable()
+    internal var iPokemonList: IPokemonList
+    internal lateinit var recyclerView: RecyclerView
+
+    init {
+        var retrofit: Retrofit = RetrofitClient.instance
+        iPokemonList = retrofit.create(IPokemonList::class.java)
     }
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_pokemon_list, container, false)
+        val itemView = inflater.inflate(R.layout.fragment_pokemon_list, container, false)
+
+        recyclerView = itemView.findViewById(R.id.pokemon_recyclerview) as RecyclerView
+        recyclerView.setHasFixedSize(true)
+        recyclerView.layoutManager = GridLayoutManager(activity, 2)
+        val itemDecoration = ItemOffsetDecoration(activity!!, R.dimen.spacing)
+        recyclerView.addItemDecoration(itemDecoration)
+        fetchData()
+        return itemView
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment PokemonList.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-                PokemonList().apply {
-                    arguments = Bundle().apply {
-                        putString(ARG_PARAM1, param1)
-                        putString(ARG_PARAM2, param2)
-                    }
-                }
+    private fun fetchData() {
+        compositeDisposable.add(iPokemonList.listPokemon
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe {pokemonDex ->
+                Common.pokemonList = pokemonDex.pokemon!!
+                val adapter = PokemonListAdapter(activity!!, Common.pokemonList)
+                recyclerView.adapter = adapter
+            }
+        );
     }
+
 }
