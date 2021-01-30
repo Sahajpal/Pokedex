@@ -5,6 +5,6 @@ import io.reactivex.Observable
 import retrofit2.http.GET
 
 interface IPokemonList {
-    @get:GET("pokemon.json")
+    @get:GET("pokedex.json")
     val listPokemon: Observable<Pokedex>
 }
