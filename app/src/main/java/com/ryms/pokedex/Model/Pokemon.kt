@@ -15,7 +15,7 @@ class Pokemon {
     var avg_spawns: Double = 0.toDouble()
     var spawn_time: String ?= null
     var multipliers: List<Double> ?= null
-    var weakness: List<String> ?= null
+    var weaknesses: List<String> ?= null
     var next_evolution: List<Evolution> ?= null
     var prev_evolution: List<Evolution> ?= null
 }
