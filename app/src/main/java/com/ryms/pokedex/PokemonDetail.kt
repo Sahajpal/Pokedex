@@ -15,9 +15,6 @@ import com.ryms.pokedex.Adapter.PokemonTypeAdapter
 import com.ryms.pokedex.Common.Common
 import com.ryms.pokedex.Model.Pokemon
 
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
 class PokemonDetail : Fragment() {
 
     internal lateinit var pokemon_img: ImageView

@@ -1,7 +1,6 @@
 package com.ryms.pokedex.Common
 
 import android.content.Context
-import android.graphics.Canvas
 import android.graphics.Rect
 import android.view.View
 import androidx.annotation.DimenRes
