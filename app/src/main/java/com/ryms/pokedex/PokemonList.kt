@@ -1,12 +1,16 @@
 package com.ryms.pokedex
 
+import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.mancj.materialsearchbar.MaterialSearchBar
 import com.ryms.pokedex.Adapter.PokemonListAdapter
 import com.ryms.pokedex.Common.Common
 import com.ryms.pokedex.Common.ItemOffsetDecoration
@@ -21,7 +25,14 @@ class PokemonList : Fragment() {
 
     internal var compositeDisposable = CompositeDisposable()
     internal var iPokemonList: IPokemonList
+
     internal lateinit var recyclerView: RecyclerView
+
+    internal lateinit var searchBar: MaterialSearchBar
+
+    internal lateinit var adapter: PokemonListAdapter
+    internal lateinit var search_adapter: PokemonListAdapter
+    internal var last_suggest: MutableList<String> = ArrayList()
 
     init {
         var retrofit: Retrofit = RetrofitClient.instance
@@ -39,6 +50,37 @@ class PokemonList : Fragment() {
         recyclerView.layoutManager = GridLayoutManager(activity, 2)
         val itemDecoration = ItemOffsetDecoration(activity!!, R.dimen.spacing)
         recyclerView.addItemDecoration(itemDecoration)
+
+        searchBar.setHint("Enter Pokemon Name")
+        searchBar.setCardViewElevation(10)
+        searchBar.addTextChangeListener(object : TextWatcher {
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                val suggest = ArrayList<String>()
+                for(search: in last_suggest)
+                    if(search.toLowerCase().contains(searchBar.text.toLowerCase()))
+                        suggest.add(search)
+                searchBar.lastSuggestions = suggest
+            }
+
+            override fun afterTextChanged(p0: Editable?) {
+
+            }
+        })
+        searchBar.setOnSearchActionListener(object: MaterialSearchBar.OnSearchActionListener{
+            override fun onSearchStateChanged(enabled: Boolean) {
+            }
+
+            override fun onSearchConfirmed(text: CharSequence?) {
+            }
+
+            override fun onButtonClicked(buttonCode: Int) {
+            }
+        })
+
         fetchData()
         return itemView
     }
@@ -49,7 +91,7 @@ class PokemonList : Fragment() {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {pokemonDex ->
                 Common.pokemonList = pokemonDex.pokemon!!
-                val adapter = PokemonListAdapter(activity!!, Common.pokemonList)
+                adapter = PokemonListAdapter(activity!!, Common.pokemonList)
                 recyclerView.adapter = adapter
             }
         );

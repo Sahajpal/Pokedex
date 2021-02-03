@@ -3,12 +3,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".PokemonList">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
+
+        <com.mancj.materialsearchbar.MaterialSearchBar
+            android:id="@+id/searchBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:elevation="10dp"
+            android:padding="16dp"
+            android:visibility="visible"
+            app:mt_hint="Enter Pokemon Name"
+            android:background="#26adc2eb"
+            app:mt_speechMode="false">
+        </com.mancj.materialsearchbar.MaterialSearchBar>
         
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/pokemon_recyclerview"
