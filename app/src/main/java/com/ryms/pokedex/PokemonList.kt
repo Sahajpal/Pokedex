@@ -14,6 +14,7 @@ import com.mancj.materialsearchbar.MaterialSearchBar
 import com.ryms.pokedex.Adapter.PokemonListAdapter
 import com.ryms.pokedex.Common.Common
 import com.ryms.pokedex.Common.ItemOffsetDecoration
+import com.ryms.pokedex.Model.Pokemon
 import com.ryms.pokedex.Retrofit.IPokemonList
 import com.ryms.pokedex.Retrofit.RetrofitClient
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -28,7 +29,7 @@ class PokemonList : Fragment() {
 
     internal lateinit var recyclerView: RecyclerView
 
-    internal lateinit var searchBar: MaterialSearchBar
+    internal lateinit var search_bar: MaterialSearchBar
 
     internal lateinit var adapter: PokemonListAdapter
     internal lateinit var search_adapter: PokemonListAdapter
@@ -51,30 +52,32 @@ class PokemonList : Fragment() {
         val itemDecoration = ItemOffsetDecoration(activity!!, R.dimen.spacing)
         recyclerView.addItemDecoration(itemDecoration)
 
-        searchBar.setHint("Enter Pokemon Name")
-        searchBar.setCardViewElevation(10)
-        searchBar.addTextChangeListener(object : TextWatcher {
+        search_bar = itemView.findViewById(R.id.search_bar) as MaterialSearchBar
+        search_bar.addTextChangeListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
 
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 val suggest = ArrayList<String>()
-                for(search: in last_suggest)
-                    if(search.toLowerCase().contains(searchBar.text.toLowerCase()))
+                for(search in last_suggest)
+                    if(search.toLowerCase().contains(search_bar.text.toLowerCase()))
                         suggest.add(search)
-                searchBar.lastSuggestions = suggest
+                search_bar.lastSuggestions = suggest
             }
 
             override fun afterTextChanged(p0: Editable?) {
 
             }
         })
-        searchBar.setOnSearchActionListener(object: MaterialSearchBar.OnSearchActionListener{
+        search_bar.setOnSearchActionListener(object: MaterialSearchBar.OnSearchActionListener{
             override fun onSearchStateChanged(enabled: Boolean) {
+                if (!enabled)
+                    recyclerView.adapter = adapter
             }
 
             override fun onSearchConfirmed(text: CharSequence?) {
+                startSearch(text.toString())
             }
 
             override fun onButtonClicked(buttonCode: Int) {
@@ -85,6 +88,17 @@ class PokemonList : Fragment() {
         return itemView
     }
 
+    private fun startSearch(text: String) {
+        if(Common.pokemonList.size > 0) {
+            val result = ArrayList<Pokemon>()
+            for (pokemon in Common.pokemonList)
+                if (pokemon.name!!.toLowerCase().contains(text.toLowerCase()))
+                    result.add(pokemon)
+            search_adapter = PokemonListAdapter(activity!!, result)
+            recyclerView.adapter = search_adapter
+        }
+    }
+
     private fun fetchData() {
         compositeDisposable.add(iPokemonList.listPokemon
             .subscribeOn(Schedulers.io())
@@ -93,6 +107,12 @@ class PokemonList : Fragment() {
                 Common.pokemonList = pokemonDex.pokemon!!
                 adapter = PokemonListAdapter(activity!!, Common.pokemonList)
                 recyclerView.adapter = adapter
+
+                last_suggest.clear()
+                for (pokemon in Common.pokemonList)
+                    last_suggest.add(pokemon.name!!)
+                search_bar.visibility = View.VISIBLE
+                search_bar.lastSuggestions = last_suggest
             }
         );
     }

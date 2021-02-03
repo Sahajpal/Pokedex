@@ -20,9 +20,9 @@ class MainActivity : AppCompatActivity() {
                 supportActionBar!!.setDisplayShowHomeEnabled(true)
 
                 val detailFragment = PokemonDetail.getInstance()
-                val position = intent.getIntExtra("position", -1)
+                val num = intent.getStringExtra("num")
                 val bundle = Bundle()
-                bundle.putInt("position", position)
+                bundle.putString("num", num)
                 detailFragment.arguments = bundle
 
                 val fragmentTransaction = supportFragmentManager.beginTransaction()

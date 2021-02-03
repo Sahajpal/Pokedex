@@ -50,7 +50,7 @@ class PokemonListAdapter(internal var context: Context,
             override fun onClick(view: View, position: Int) {
 
                 LocalBroadcastManager.getInstance(context)
-                    .sendBroadcast(Intent(Common.KEY_ENABLE_HOME).putExtra("position", position))
+                    .sendBroadcast(Intent(Common.KEY_ENABLE_HOME).putExtra("num", pokemonList[position].num))
             }
         })
     }
